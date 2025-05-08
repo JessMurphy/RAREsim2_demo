@@ -20,7 +20,7 @@ WD=/data001/projects/murphjes/RAREsim2/datasets
 #    --mac ${WD}/MAC_bins2/MAC_bins_${nsim}.txt \
 #    -o ${WD}/MAC_bins2/${pop}/Expected_MAC_${nsim}_${pop}_${pcase[$p]}.txt \
 #    -N $((2*$ncase)) \
-#    --nvar_target_data ${WD}/MAC_bin2s/${pop}/chr19_block37_${pop}_nvar_target_data.txt \
+#    --nvar_target_data ${WD}/MAC_bins2/${pop}/chr19_block37_${pop}_nvar_target_data.txt \
 #    --afs_target_data ${WD}/MAC_bins2/${pop}/chr19_block37_${pop}_AFS_target_data.txt \
 #    --w_fun $(echo "scale=1; ${pcase[$p]} / 100" | bc) \
 #    --reg_size 19.029
@@ -166,15 +166,12 @@ python3 /home/math/murphjes/raresim2/sim.py \
 # extract the controls for the opposite direction of effect scenario
 python3 /home/math/murphjes/raresim2/extract.py \
     -i ${WD}/Hapgen$((nsim/1000))K_pruned2/${prefix}.${nsim}.all.opp.100fun.100syn.${opp[$o]}.haps.gz \
-    -o ${WD}/Cases2/${prefix}.${ncase}.controls.opp.100fun.100syn.${opp[$o]}.haps.gz \
+    -o ${WD}/Controls2/${prefix}.${ncase}.controls.opp.100fun.100syn.${opp[$o]}.haps.gz \
     -n $((2*$ncase)) \
     --seed $i
 
-# move the controls for the opposite direction of effect scenario
-mv ${WD}/Cases2/${prefix}.${ncase}.controls.opp.100fun.100syn.${opp[$o]}.haps-remainder.gz ${WD}/Controls2/${pop}/Round${n}/
-
 # remove unnecessary files
-rm ${WD}/Cases2/${prefix}.${ncase}.controls.opp.100fun.100syn.${opp[$o]}.haps-sample.gz
+rm ${WD}/Controls2/${prefix}.${ncase}.controls.opp.100fun.100syn.${opp[$o]}.haps-sample.gz
 
 done
 
