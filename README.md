@@ -22,6 +22,8 @@ Hapgen2 requires reference haplotypes and an accompanying legend file as well as
 | NFE		| 808			| 14705483		| 11,418			|
 | SAS		| 978			| 14508902 		| 14,269			|	
 
+Heterozygote/homozygote risks of 1.00/1.00 were used.
+
 ## 4. Create RAREsim2 Datasets
 
 ## 5. Run Methods
