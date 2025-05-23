@@ -11,6 +11,8 @@
 
 ## 3. Run Hapgen2
 
+Hapgen2 requires reference haplotypes and an accompanying legend file as well as a recombination map and disease locus as input. 
+
 *Table of Hapgen2 Input Parameters*
 
 |**Population**	|**No. of<br>Haplotypes**|**Disease<br>Locus**	|**Effective<br>Population Size**|
