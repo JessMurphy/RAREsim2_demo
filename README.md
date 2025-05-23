@@ -13,7 +13,7 @@
 
 *Table of Hapgen2 Input Parameters*
 
-|**Population**	|**No. of /nHaplotypes**|**Disease Locus**	|**Effective /nPopulation Size**|
+|**Population**	|**No. of<br>Haplotypes**|**Disease<br>Locus**	|**Effective<br>Population Size**|
 |:--------------|:----------------------|:----------------------|:------------------------------|
 | AFR		| 1,008			| 14627281 		| 17,469 			|
 | EAS		| 1,008			| 14673368 		| 14,269 			|
