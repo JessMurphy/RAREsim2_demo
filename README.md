@@ -1,15 +1,26 @@
-# RAREsim2_demo
+# RAREsim2 Demonstration
 
+This repository provides the workflow for the RAREsim2 demonstration detailed here (provide link to paper). 
+
+## Computing Environment
+We used a high-performance computing cluster with 2048 AMD cores and 16TB memory in 32 compute nodes. Each node has 2 AMD EPYC 7502 32 core processors for a total of 64 cores, 512GB DDR4 memory, and dual 960GB SSD. 
+
+Singularity container with R, python, and Hapgen2 installed.
 * SKATBinary
-* R version
+* R version 4.2.1
 
-## 0. Make Directories
+## Pipeline
 
-## 1. Make Master Legend
+### 0_make_directories.sh
 
-## 2. Subset Master Legend
+### 1_submit_legend_files.sh
 
-## 3. Run Hapgen2
+* **1b_make_master_legend.R**:
+* **1b_subset_master_legend.R**:
+
+### 2_submit_hapgen2.sh
+
+* **2a_run_hapgen2.sh**:
 
 Hapgen2 requires reference haplotypes and an accompanying legend file as well as a recombination map and disease locus as input. 
 
@@ -24,8 +35,34 @@ Hapgen2 requires reference haplotypes and an accompanying legend file as well as
 
 Heterozygote/homozygote risks of 1.00/1.00 were used.
 
-## 4. Create RAREsim2 Datasets
+### 3_submit_power_analysis.sh
 
-## 5. Run Methods
+* **3a_run_RAREsim2_power.sh**:
+* **3b_run_RAREsim2_power_unequal.sh**:
+* **3c_run_methods_opp_power.R**:
+* **3c_run_methods_opp_power_unequal.R**:
+* **3c_run_methods_same_power.R**:
 
-## 6. Plot Results
+### 4_submit_t1e_analysis.sh
+
+* **4a_run_RAREsim2_t1e.sh**:
+* **4b_run_methods_t1e.R**:
+
+### 5_plot_results.R
+
+## Run Time
+
+|**Step**	|**Time (hh:mm:ss)**|
+|:--------------|:----------------------|
+| 0_make_directories.sh | |
+| 1a_make_master_legend.R | 00:00:33 |
+| 1b_subset_master_legend.R | 00:01:03 |
+| 2a_run_hapgen2.sh | 01:20:41 | |
+| 3a_run_RAREsim2_power.sh | |
+| 3b_run_RAREsim2_power_unequal.sh | |
+| 3c_run_methods_*_power.R | |
+| 4a_run_RAREsim2_t1e.sh | |
+| 4b_run_methods_t1e.R | |
+| 5_plot_results.R | |
+|**Total**| |
+
