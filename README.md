@@ -5,9 +5,10 @@ This repository provides the workflow for the RAREsim2 demonstration detailed he
 ## Computing Environment
 We used a high-performance computing cluster with 2048 AMD cores and 16TB memory in 32 compute nodes. Each node has 2 AMD EPYC 7502 32 core processors for a total of 64 cores, 512GB DDR4 memory, and dual 960GB SSD. 
 
-Singularity container with R, python, and Hapgen2 installed.
+We ran the pipeline using a singularity container with R version 4.2.1, python version 3.10.6, and Hapgen2 version 2.2.0 installed.
 * SKATBinary
-* R version 4.2.1
+
+![R package info](RAREsim2%20required%20R%20package%20info.png)
 
 ## Pipeline
 
