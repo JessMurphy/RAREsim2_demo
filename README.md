@@ -16,7 +16,7 @@ We ran the pipeline using a singularity container with R version 4.2.1, python v
 
 ### 1_submit_legend_files.sh
 
-* **1b_make_master_legend.R**:
+* **1a_make_master_legend.R**:
 * **1b_subset_master_legend.R**:
 
 ### 2_submit_hapgen2.sh
