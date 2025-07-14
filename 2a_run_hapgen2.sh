@@ -10,8 +10,10 @@ b=37 #block number
 Hap=./input/1000G/${pop}_Block${b}_CDS_ref_added.hap
 Map=./input/1000G/genetic_map_chr${num}_combined.txt
 
-start=1
-end=5
+# unzip the haplotype file initially
+if [ "$end" == "100" ]; then gunzip $Hap.gz; fi
+
+start=$(($end-99))
 
 for i in $(eval echo "{$start..$end}")
 do
@@ -25,11 +27,8 @@ Output=./datasets/Hapgen$((Nsim/1000))K/${pop}/Round${n}/chr${num}.block${b}.${p
 # save a copy of the legend file
 cp $Output.legend $Output.copy.legend
 
-# unzip the haplotype file
-gunzip $Hap.gz
-
 # simulate with HAPGEN2
-/storage/singularity/mixtures.sif hapgen2 -h $Hap \
+hapgen2 -h $Hap \
 -m $Map \
 -l $Output.copy.legend \
 -o $Output.gz \
@@ -45,3 +44,7 @@ rm $Output.controls.sample
 echo $i
 
 done
+
+# rezip the haplotype file at the end
+if [ "$end" == "10000" ]; then gzip $Hap; fi
+

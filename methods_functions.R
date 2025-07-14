@@ -14,6 +14,7 @@ make_geno = function(hap){
   return(geno)
 }
 
+
 # function to calculate the allele counts/frequencies
 calc_allele_freqs = function(geno, n, sum=NULL, source=NULL) {
   
@@ -32,47 +33,6 @@ calc_allele_freqs = function(geno, n, sum=NULL, source=NULL) {
   return(counts)
 }
 
-# function to create a dataframe with a line for each variant instead of just counts 
-# (necessary for ProxECAT v2)
-make_long = function(counts, leg, case, group){
-  
-  # add information to the counts
-  temp = counts %>% mutate(id=leg$id, gene=leg$gene, fun=leg$fun, case=case, group=group)
-  
-  # remove the monomorphic variants 
-  temp2 = temp %>% dplyr::filter(ac!=0)
-  
-  # repeat each variant mac times
-  out = data.frame(lapply(temp2, rep, temp2$ac)) %>% select(-ac, -af)
-  
-  return(out)
-}
-
-# function to merge the case datasets for power and type I error calculations
-merge_cases = function(cases.power, cases.t1e, leg, genes.power) {
-  
-  # add row number and gene column to each hap
-  hap.power = cases.power %>% mutate(row = leg$row, gene = leg$gene)
-  hap.t1e = cases.t1e %>% mutate(row = leg$row, gene = leg$gene)
-  
-  # subset haps to the necessary genes
-  power.gene = subset(hap.power, gene %in% genes.power) 
-  t1e.gene = subset(hap.t1e, !(gene %in% genes.power))
-  
-  # make sure the column names are the same
-  names(t1e.gene) = names(power.gene)
-  
-  # merge the two case haps
-  hap.out = rbind(power.gene, t1e.gene)
-  
-  # order the merged hap file by row number
-  hap.out = hap.out[order(hap.out$row),]
-  
-  # remove the row number and gene columns
-  hap.out = subset(hap.out, select = -c(row, gene))
-  
-  return(hap.out)
-}
 
 # function to flip values for a specified file at variants with an AF >= 1-maf 
 # (used in the flip_data function below)
@@ -162,63 +122,6 @@ flip_data = function(leg, flip, geno_case, count_case, Ncase, cntrl, geno_ic=NUL
     }
 }
 
-# function for formatting data and running statistical test for ProxECAT by gene
-prox_gene_data_prep = function(data_prox, common) {
-  
-  # count the number of fun and syn alleles by case status
-  # (need .drop param so it still creates a group even if AC is 0)
-  counts_gene = data_prox %>% count(gene, case, fun, .drop = FALSE)
-  
-  # convert the counts to wide format
-  counts_wide = tidyr::pivot_wider(counts_gene, names_from=c(case, fun), values_from=n,
-                                   values_fill=0, names_sep="_") %>% 
-    mutate(case_ratio = case_fun/case_syn, control_ratio = control_fun/control_syn)
-  
-  # calculate medians (set na.rm to TRUE to avoid median ratio being NA if there's a divide by 0 problem)
-  median_case_ratio = median(counts_wide$case_ratio, na.rm = TRUE)
-  median_control_ratio = median(counts_wide$control_ratio, na.rm = TRUE)
-  
-  # calculate the necessary variables for proxecat-weighted and 
-  # call proxecat if there are enough functional/synonymous variants
-  counts_wide2 = counts_wide %>% mutate(case_fun_w = case_fun/median_case_ratio,
-                                        control_fun_w = control_fun/median_control_ratio) %>%
-  mutate(prox = ifelse(case_fun + control_fun < 5 | case_syn + control_syn < 5, NA,
-                       proxecat(case_fun, case_syn, control_fun, control_syn)$p.value),
-         prox_w = ifelse(case_fun_w + control_fun_w < 5 | case_syn + control_syn < 5, NA,
-                         proxecat(case_fun_w, case_syn, control_fun_w, control_syn)$p.value))
-  
-  return(counts_wide2)
-}
-
-# function for formatting data and running statistical test for LogProx
-logprox_gene_data_prep = function(data_logprox, current_gene, all=F, multiple=F, adjusted=F) {
-  
-  # filter data by gene
-  data_gene = data_logprox %>% filter(gene==current_gene)
-  
-  # count the number of fun and syn alleles by case status
-  # need .drop param so it still creates a group even if AC is 0
-  counts_data_gene = data_gene %>% count(case, fun, .drop = FALSE)
-  
-  # fit the logprox model
-  if (multiple){
-    
-    prox = tryCatch(ifelse((counts_data_gene$n[1] + counts_data_gene$n[3] < 5) | (counts_data_gene$n[2] + counts_data_gene$n[4] < 5),
-                           NA, summary(glm(fun ~ case + source, data=data_gene, family="binomial"))$coefficients[2,4]), error = function(e) NA)
-        
-  } else if (all & adjusted){
-    
-    prox = tryCatch(ifelse((counts_data_gene$n[1] + counts_data_gene$n[3] < 5) | (counts_data_gene$n[2] + counts_data_gene$n[4] < 5),
-                           NA, summary(glm(fun ~ case + group, data=data_gene, family="binomial"))$coefficients[2,4]), error = function(e) NA)
-  
-  } else{
-    
-    prox = tryCatch(ifelse((counts_data_gene$n[1] + counts_data_gene$n[3] < 5) | (counts_data_gene$n[2] + counts_data_gene$n[4] < 5),
-                           NA, summary(glm(fun ~ case, data=data_gene, family="binomial"))$coefficients[2,4]), error = function(e) NA)
-  }
-    
-  return(prox) 
-}
 
 # define function for calculating power
 my.power = function(values, alpha=0.05){
@@ -226,5 +129,26 @@ my.power = function(values, alpha=0.05){
   sig = which(as.numeric(values2) <= alpha)
   out = length(sig)/length(values2)
   return(out)
+}
+
+# define function to add confidence intervals to power results
+add_CIs = function(results, nsim){
+  
+  results$Lower = '.'
+  results$Upper = '.'
+  
+  ## CI stack exchange:
+  # https://stats.stackexchange.com/questions/82720/confidence-interval-around-binomial-estimate-of-0-or-1
+  # paper: https://projecteuclid.org/journals/statistical-science/volume-16/issue-2/Interval-Estimation-for-a-Binomial-Proportion/10.1214/ss/1009213286.full?tab=ArticleFirstPage
+  
+  for(i in 1:nrow(results)){ # default level is 95% confidence
+    results$Lower[i] = binom.confint(nsim*results$Value[i], nsim, method=c("wilson"), type="central")$lower
+    results$Upper[i] = binom.confint(nsim*results$Value[i], nsim, method=c("wilson"), type="central")$upper
+  }
+  
+  results$Lower = as.numeric(results$Lower)
+  results$Upper = as.numeric(results$Upper)
+  
+  return(results)
 }
                                 
